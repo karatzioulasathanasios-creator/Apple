@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SINTELIA Pulse — AAPL FINAL v1.0</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SINTELIA VUAA">
+<meta name="theme-color" content="#ffffff">
+<style>
+:root{
+  --bg:#ffffff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--soft:#f9fafb;
+  --green:#168a3a;--green2:#eaf8ef;--yellow:#f6b700;--yellow2:#fff8df;
+  --red:#d71920;--red2:#fff0f0;--blue:#0b72ff;--blue2:#eef5ff;
+  --card:#ffffff;--shadow:0 10px 30px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 28px}
+.header{display:grid;grid-template-columns:1fr auto auto;gap:18px;align-items:start}
+h1{font-size:28px;line-height:1;margin:0 0 8px;font-weight:1000;letter-spacing:-.4px}
+.sub{color:#111;opacity:.78;font-size:15px;line-height:1.35}
+.clock{text-align:right;font-weight:900;font-size:18px}.clock small{display:block;color:var(--muted);font-weight:600;font-size:12px;margin-top:3px}
+.livebox{border:1px solid #b9e7c5;background:#fff;border-radius:16px;padding:10px 16px;font-weight:1000;color:#0f7c32;display:flex;gap:10px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block}
+.refresh{border:1px solid #a7c8ff;background:#fff;color:var(--blue);font-weight:900;border-radius:10px;padding:9px 16px;margin-top:10px}
+.marketgrid{margin-top:16px;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:var(--shadow);display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden}
+.mcell{padding:18px 20px;border-right:1px solid var(--line)}
+.mcell:last-child{border-right:0}
+.label{font-size:12px;text-transform:uppercase;color:#4b5563;letter-spacing:.03em;margin-bottom:8px}
+.big{font-size:20px;font-weight:1000}.red{color:var(--red)}.green{color:var(--green)}.yellow{color:var(--yellow)}
+.small{font-size:12px;color:#4b5563;margin-top:5px}
+.hero{margin-top:18px;border:1px solid #ffd063;border-radius:20px;background:linear-gradient(90deg,#fffaf0,#fffdf8);padding:24px;display:grid;grid-template-columns:150px 1fr 310px;gap:20px;align-items:center}
+.lock{width:108px;height:108px;border-radius:50%;background:linear-gradient(#fff3c4,#ffe38c);border:1px solid #f2c94c;display:flex;align-items:center;justify-content:center;font-size:52px;margin:auto}
+.state{font-size:58px;font-weight:1000;letter-spacing:-1px}.signal{font-size:23px;font-weight:1000}.signal span{color:var(--yellow)}
+.gatebox{justify-self:end;border:1px solid #ffd063;border-radius:14px;padding:14px 18px;background:#fff7df;min-width:260px}.gatebox b{display:inline-block;background:#fff0bd;border:1px solid #f2c94c;border-radius:10px;padding:6px 14px;margin-bottom:10px}.gatebox .danger{color:var(--red);font-weight:1000;margin-bottom:8px}
+.pills{display:flex;gap:14px;flex-wrap:wrap;margin-top:20px}
+.pill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 22px;font-weight:1000}
+.pill.ok{background:var(--green2);border-color:#b8e9c7;color:#0b6c2c}
+.pill.blue{background:var(--blue2);border-color:#c7dcff;color:#075bd7}
+.pill.gray{background:#f7f7f7}
+.main{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:18px;margin-top:18px}
+.card{border:1px solid var(--line);border-radius:18px;background:var(--card);box-shadow:var(--shadow);padding:18px}
+.price{font-size:32px;font-weight:1000;margin-bottom:8px}.tag{display:inline-block;margin-left:8px;background:#f0f0f0;border:1px solid #ddd;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900}
+.confrow{display:grid;grid-template-columns:1fr 230px;gap:14px;align-items:center;margin-top:14px}
+.bar{height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden}.fill{height:100%;width:0%;background:var(--green)}
+.confnum{font-size:28px;font-weight:1000;color:var(--green)}.confsub{font-size:12px;color:#4b5563}
+.chartwrap{border:1px solid var(--line);border-radius:16px;background:#fbfbfb;padding:10px;margin-top:18px}
+canvas{display:block;width:100%;height:230px}
+.minmax{display:flex;justify-content:space-between;margin-top:10px;font-size:13px;font-weight:800}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.metric{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff}
+.metric .name{color:var(--muted);font-size:14px}.metric .val{font-size:26px;font-weight:1000;margin:6px 0}.metric .pass{color:var(--green);font-weight:1000;font-size:12px}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+button{cursor:pointer}
+.btn{border:1px solid #d1d5db;border-radius:11px;background:#fff;padding:10px;font-weight:1000;color:var(--blue)}
+.btn.black{background:#000;color:#fff;border-color:#000}.btn.red{color:#e11d48}
+.side{display:flex;flex-direction:column;gap:12px}
+.memtable{width:100%;border-collapse:collapse;font-size:13px}
+.memtable th{color:#4b5563;text-align:left;font-size:12px;border-bottom:1px solid var(--line);padding:8px 5px}
+.memtable td{border-bottom:1px solid #f1f1f1;padding:8px 5px}
+.badgeHold{background:var(--yellow2);border:1px solid #fde29a;color:#a16207;border-radius:999px;padding:4px 10px;font-weight:900}
+.progress{height:13px;background:#eee;border-radius:999px;overflow:hidden}.progress div{height:100%;width:0%;background:var(--green)}
+.sysrow{display:flex;justify-content:space-between;border-bottom:1px solid #f1f1f1;padding:8px 0;font-size:14px}.sysrow b{color:var(--green)}
+.diag{margin-top:18px}.diaghead{display:flex;justify-content:space-between;gap:12px;align-items:center}.okbadge{background:var(--green2);color:var(--green);border-radius:999px;padding:4px 10px;font-weight:1000;font-size:12px}
+pre{white-space:pre-wrap;background:#fbfbfb;border:1px solid var(--line);border-radius:12px;padding:12px;max-height:220px;overflow:auto;font-size:12px;color:#333}
+.footer{margin-top:14px;border:1px solid #ffd063;background:#fff8df;border-radius:12px;padding:12px 18px;font-size:12px;color:#3d3320;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media(max-width:900px){
+  .header{grid-template-columns:1fr auto}.header .livecol{grid-column:1/3}
+  .marketgrid{grid-template-columns:1fr 1fr}.mcell:nth-child(2){border-right:0}.mcell{border-bottom:1px solid var(--line)}.mcell:nth-child(3),.mcell:nth-child(4){border-bottom:0}
+  .hero{grid-template-columns:1fr;text-align:center}.gatebox{justify-self:stretch}
+  .main{grid-template-columns:1fr}.confrow{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div>
+      <h1>SINTELIA Pulse — AAPL</h1>
+      <div class="sub">Apple Inc. • NASDAQ • USD • OPS + AXIOM A<br><b>FINAL v1.2 • NASDAQ MARKET LOCK • ADAPTIVE MEMORY • CALIBRATION</b></div>
+    </div>
+    <div class="clock"><span id="timeNow">--:--:--</span><small>America/New_York</small></div>
+    <div class="livecol">
+      <div class="livebox"><span>LIVE</span><small id="health">health: CHECK</small><span class="dot"></span></div>
+      <button class="refresh" id="refreshBtn">↻ Refresh Data</button>
+    </div>
+  </div>
+
+  <div class="marketgrid">
+    <div class="mcell"><div class="label">Market status</div><div class="big red" id="marketStatus">● CHECK</div><div class="small">NASDAQ</div></div>
+    <div class="mcell"><div class="label">Next open</div><div class="big" id="nextOpen">—</div><div class="small" id="nextOpenTime">09:30</div></div>
+    <div class="mcell"><div class="label">Local time (New York)</div><div class="big" id="marketTime">—</div><div class="small">UTC+1/+2</div></div>
+    <div class="mcell"><div class="label">Market window</div><div class="big">09:30 - 16:00</div><div class="small">Mon - Fri</div></div>
+  </div>
+
+  <div class="hero">
+    <div class="lock">🔒</div>
+    <div>
+      <div class="state" id="state">HOLD</div>
+      <div class="signal">SIGNAL: <span id="signal">WAIT</span></div>
+    </div>
+    <div class="gatebox">
+      <b id="gateTitle">MARKET CLOSED</b>
+      <div class="danger" id="gateStatus">GO gate: DISABLED</div>
+      <div id="gateText">GO/ARM are disabled while market is closed.</div>
+    </div>
+  </div>
+
+  <div class="pills">
+    <div class="pill ok" id="axiomPill">AXIOM A: —</div>
+    <div class="pill blue" id="opsPill">OPS: —</div>
+    <div class="pill gray" id="regimePill">REGIME: —</div>
+  </div>
+
+  <div class="main">
+    <div class="card">
+      <div class="price" id="price">$ —</div>
+      <div><b>AAPL</b> • NASDAQ • USD <span class="tag" id="marketTag">CHECK</span></div>
+      <div class="small" id="prevClose">prev close: —</div>
+
+      <div class="confrow">
+        <div>
+          <div class="label">Confidence (adaptive smoothed)</div>
+          <div class="bar"><div class="fill" id="confFill"></div></div>
+          <div class="confsub" id="confSub">LOW</div>
+        </div>
+        <div><div class="confnum" id="confPct">0%</div></div>
+      </div>
+
+      <div class="chartwrap"><canvas id="chart" width="900" height="260"></canvas></div>
+      <div class="minmax"><span>Min: <b id="minP">—</b></span><span>Max: <b id="maxP">—</b></span></div>
+
+      <div class="metrics">
+        <div class="metric"><div class="name">PCS_z</div><div class="val" id="pcsV">—</div><div class="pass" id="pcsPass">—</div></div>
+        <div class="metric"><div class="name">Π</div><div class="val" id="piV">—</div><div class="pass" id="piPass">—</div></div>
+        <div class="metric"><div class="name">SCG</div><div class="val" id="scgV">—</div><div class="pass" id="scgPass">—</div></div>
+        <div class="metric"><div class="name">PASS streak</div><div class="val" id="streakV">0s</div><div class="pass">OPS persistence</div></div>
+        <div class="metric"><div class="name">Memory</div><div class="val" id="memV">0</div><div class="pass" id="memK">GO 0 • ARM 0 • HOLD 0</div></div>
+        <div class="metric"><div class="name">Calibration</div><div class="val yellow" id="calV">WARMUP</div><div class="pass" id="calK">0-100 decisions</div></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn black" id="overlayBtn">GO Overlay: ON</button>
+        <button class="btn" id="csvBtn">Export CSV</button>
+        <button class="btn" id="jsonBtn">Export JSON</button>
+        <button class="btn" id="memoryBtn">Export Memory</button>
+        <button class="btn red" id="clearMemoryBtn">Clear Memory</button>
+        <button class="btn red" id="clearAuditBtn">Clear Audit</button>
+      </div>
+    </div>
+
+    <div class="side">
+      <div class="card">
+        <h3 style="margin:0 0 10px">Memory <small>(last 20)</small></h3>
+        <table class="memtable">
+          <thead><tr><th>Time</th><th>Verdict</th><th>Conf%</th><th>PCS_z</th><th>Π</th><th>SCG</th></tr></thead>
+          <tbody id="memoryRows"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 10px">Calibration Details</h3>
+        <div class="sysrow"><span>Total decisions</span><b id="totalDec">0</b></div>
+        <div class="sysrow"><span>Calibration status</span><b id="calStatus">WARMUP</b></div>
+        <div class="sysrow"><span>Model version</span><b>1.2.0</b></div>
+        <div class="sysrow"><span>Calibration mode</span><b>LOCAL GUARD</b></div>
+        <div style="margin-top:14px"><div class="row" style="display:flex;justify-content:space-between"><b>Calibration Progress</b><b id="calProgressText">0 / 100</b></div><div class="progress"><div id="calProgress"></div></div><div class="small">0-100 WARMUP • 100-500 LEARNING • &gt;500 CALIBRATED</div></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 10px">Adaptive Memory</h3>
+        <div class="sysrow"><span>Nearest cases</span><b id="nearCases">—</b></div>
+        <div class="sysrow"><span>Memory verdict</span><b id="memVerdict">—</b></div>
+        <div class="sysrow"><span>Memory confidence</span><b id="memConf">—</b></div>
+        <div class="sysrow"><span>Memory guard</span><b id="memGuard">—</b></div>
+        <div class="small" id="memExplain" style="margin-top:10px">Uses stored decisions to stabilize new decisions. Deterministic nearest-neighbor lookup, not AI and not financial advice.</div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 10px">System Check</h3>
+        <div class="sysrow"><span>Worker (Cloudflare)</span><b id="chkWorker">—</b></div>
+        <div class="sysrow"><span>Data Feed (Yahoo)</span><b id="chkFeed">—</b></div>
+        <div class="sysrow"><span>OPS Engine</span><b id="chkOps">OK</b></div>
+        <div class="sysrow"><span>Memory (localStorage)</span><b id="chkMemory">OK</b></div>
+        <div class="sysrow"><span>Audit Log</span><b id="chkAudit">OK</b></div>
+        <div class="sysrow"><span>Market Gate (Hard Lock)</span><b id="chkGate">OK</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card diag">
+    <div class="diaghead"><h3 style="margin:0">Diagnostics <span class="okbadge">OK</span></h3><button class="btn" id="copyLogBtn">Copy Log</button></div>
+    <div id="diagText" style="margin:12px 0;font-size:14px">—</div>
+    <pre id="log"></pre>
+  </div>
+
+  <div class="footer">
+    <div><b>🛡 SINTELIA PULSE</b> • OPS Runtime v1.2 • To GO δεν λέει “αγόρασε”. Λέει: «Αν θες να αγοράσεις, ΤΩΡΑ έχει νόημα να το σκεφτείς με βάση τους κανόνες».</div>
+    <button class="btn" onclick="alert('OPS = structure detector. Market Gate = permission gate. Axiom A = stability/reversion gate. No financial advice.')">About OPS & AXIOM A</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+const API="https://aged-recipe-f70e.fuffy1603.workers.dev";
+const SYMBOL="AAPL";
+const CURRENCY="$";
+const VERSION="SINTELIA_AAPL_SERIOUS_ADAPTIVE_MEMORY_v1_2";
+const K_MEMORY="SINTELIA_AAPL_FINAL_MEMORY_v1";
+const K_AUDIT="SINTELIA_AAPL_FINAL_AUDIT_v1";
+const POLL_MS=30000;
+const MAX_STALE_MS=10*60*1000;
+const el=id=>document.getElementById(id);
+let S={samples:[],lastState:"HOLD",passStreakMs:0,confEMA:0,latestMeta:null,latestOps:null,goEvents:[]};
+let MEM={samples:[],decisions:[]};
+let AUDIT=[];
+let overlayOn=true;
+try{MEM=Object.assign(MEM,JSON.parse(localStorage.getItem(K_MEMORY)||"{}"));MEM.samples=MEM.samples||[];MEM.decisions=MEM.decisions||[]}catch{}
+try{AUDIT=JSON.parse(localStorage.getItem(K_AUDIT)||"[]")||[]}catch{}
+function save(){localStorage.setItem(K_MEMORY,JSON.stringify({samples:MEM.samples.slice(-3000),decisions:MEM.decisions.slice(-3000)}));localStorage.setItem(K_AUDIT,JSON.stringify(AUDIT.slice(-500)))}
+function fmt(x){return Number(x).toLocaleString("el-GR",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function avg(a){return a.length?a.reduce((s,x)=>s+x,0)/a.length:0}
+function sd(a){let m=avg(a);return Math.sqrt(avg(a.map(x=>(x-m)*(x-m))))}
+function median(a){if(!a.length)return 0;let b=[...a].sort((x,y)=>x-y),m=Math.floor(b.length/2);return b.length%2?b[m]:(b[m-1]+b[m])/2}
+function corr(a,b){let n=Math.min(a.length,b.length);if(n<3)return 0;let x=a.slice(-n),y=b.slice(-n),mx=avg(x),my=avg(y),num=0,dx=0,dy=0;for(let i=0;i<n;i++){let xx=x[i]-mx,yy=y[i]-my;num+=xx*yy;dx+=xx*xx;dy+=yy*yy}return dx&&dy?num/Math.sqrt(dx*dy):0}
+function log(t){let s=`[${new Date().toLocaleTimeString("el-GR")}] ${t}`;el("log").textContent+=s+"\n";el("log").scrollTop=el("log").scrollHeight}
+function nyParts(now=Date.now()){let parts=new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",weekday:"short",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).formatToParts(new Date(now));let g=t=>parts.find(p=>p.type===t)?.value||"";return{wd:g("weekday"),day:g("day"),month:g("month"),year:g("year"),hour:+g("hour"),minute:+g("minute"),second:+g("second")}}
+function nySessionOpen(now=Date.now()){let p=nyParts(now),mins=p.hour*60+p.minute;return !["Sat","Sun"].includes(p.wd)&&mins>=570&&mins<=960}
+function strictOpen(meta,now=Date.now()){
+  const ex=String(meta?.exchangeName||"").toUpperCase();
+  const isAaplExchange = (ex==="" || ex==="NMS" || ex==="NASDAQ" || ex==="NGM" || ex==="NCM");
+  // Final AAPL gate: NASDAQ regular trading hours in New York.
+  // We do NOT depend only on Yahoo marketState because it can be UNKNOWN/delayed in some feeds.
+  return isAaplExchange && nySessionOpen(now);
+}
+function marketLabel(meta,now=Date.now()){return strictOpen(meta,now)?"OPEN":"CLOSED"}
+function nextOpenText(now=Date.now()){let d=new Date(now);for(let i=0;i<8;i++){let x=new Date(d.getTime()+i*86400000);let p=nyParts(x.getTime());if(!["Sat","Sun"].includes(p.wd)){if(i>0||!nySessionOpen(now)){return `${p.month}/${p.day}/${p.year}`}}}return "—"}
+function push(t,p){if(!Number.isFinite(p))return;S.samples.push([t,p]);let keep=8*3600*1000;while(S.samples.length&&t-S.samples[0][0]>keep)S.samples.shift()}
+async function fetchData(){let r=await fetch(API+"/?symbol="+encodeURIComponent(SYMBOL)+"&t="+Date.now(),{cache:"no-store"});let j=await r.json();if(!j.chart||!j.chart.result||!j.chart.result[0])throw new Error("bad feed");return j.chart.result[0]}
+
+function currentFeature(ops){
+  return {
+    pcs_z:Number(ops.pcs_z||0),
+    Pi:Number(ops.Pi||0),
+    SCG:Number(ops.SCG||0),
+    score:Number(ops.score||0)/100,
+    rolling:Number(ops.rolling||0),
+    axiom:(ops.axiom==="PASS"?1:ops.axiom==="HOLD"?0.5:0)
+  };
+}
+function featureDistance(a,b){
+  const dz=(a.pcs_z-b.pcs_z)/3.0;
+  const dpi=(a.Pi-b.Pi)/1.0;
+  const dscg=(a.SCG-b.SCG)/3.0;
+  const ds=(a.score-b.score);
+  const dr=(a.rolling-b.rolling);
+  const da=(a.axiom-b.axiom);
+  return Math.sqrt(dz*dz + dpi*dpi + dscg*dscg + ds*ds + dr*dr + da*da);
+}
+function adaptiveMemoryLookup(ops, open){
+  const d=(MEM.decisions||[]).filter(x=>Number.isFinite(Number(x.pcs_z)) && Number.isFinite(Number(x.Pi)) && Number.isFinite(Number(x.SCG)));
+  const cur=currentFeature(ops);
+  const scored=d.slice(-800).map(x=>{
+    const fx={
+      pcs_z:Number(x.pcs_z||0),
+      Pi:Number(x.Pi||0),
+      SCG:Number(x.SCG||0),
+      score:Number(x.score||0)/100,
+      rolling:Number(x.rolling||0),
+      axiom:(x.axiom==="PASS"?1:x.axiom==="HOLD"?0.5:0)
+    };
+    return {x,dist:featureDistance(cur,fx)};
+  }).sort((a,b)=>a.dist-b.dist).slice(0,30);
+
+  const counts={GO:0,ARM:0,HOLD:0,CLOSED:0};
+  for(const s of scored){
+    const v=String(s.x.verdict||"HOLD").toUpperCase();
+    if(counts[v]!==undefined) counts[v]++;
+    if(String(s.x.market||"").toUpperCase()==="CLOSED") counts.CLOSED++;
+  }
+  let top="HOLD", topN=counts.HOLD;
+  if(counts.ARM>topN){top="ARM";topN=counts.ARM}
+  if(counts.GO>topN){top="GO";topN=counts.GO}
+  const n=scored.length;
+  const memConf=n?topN/n:0;
+  let guard="NEUTRAL";
+  let scoreAdjust=0;
+
+  if(n<40 && (MEM.decisions||[]).length<100){
+    guard="WARMUP_ONLY";
+    scoreAdjust=0;
+  }else if(!open){
+    guard="MARKET_LOCK";
+    scoreAdjust=-100;
+  }else if(n>=10){
+    if(top==="HOLD" && memConf>=0.70){guard="HOLD_BIAS";scoreAdjust=-10}
+    else if(top==="ARM" && memConf>=0.65){guard="ARM_SUPPORT";scoreAdjust=+4}
+    else if(top==="GO" && memConf>=0.65){guard="GO_SUPPORT";scoreAdjust=+6}
+  }
+
+  return {n,counts,top,memConf,guard,scoreAdjust,nearest:scored.map(s=>({t:s.x.t,verdict:s.x.verdict,market:s.x.market,dist:+s.dist.toFixed(3)}))};
+}
+function updateAdaptiveUI(mem){
+  if(!el("nearCases")) return;
+  el("nearCases").textContent=String(mem.n||0);
+  el("memVerdict").textContent=mem.top||"—";
+  el("memConf").textContent=Math.round((mem.memConf||0)*100)+"%";
+  el("memGuard").textContent=mem.guard||"—";
+  el("memExplain").textContent=`GO ${mem.counts?.GO||0} • ARM ${mem.counts?.ARM||0} • HOLD ${mem.counts?.HOLD||0} among nearest stored cases`;
+}
+
+function opsAnalyze(now){
+  let meta=S.latestMeta||{},open=strictOpen(meta,now),prices=S.samples.map(x=>x[1]),d=[];for(let i=1;i<prices.length;i++)d.push(prices[i]-prices[i-1]);
+  if(d.length<35)return{score:0,confRaw:0,verdict:"HOLD",pcs_z:0,Pi:0,SCG:0,rolling:0,reversion:0,axiom:"WARMUP",reasons:["WARMUP"]};
+  let recent=d.slice(-80),absd=recent.map(Math.abs),dStar=median(absd),err=recent.map(x=>Math.abs(Math.abs(x)-dStar));
+  let con=0,total=0,run=0;for(let i=1;i<err.length;i++){if(err[i-1]>dStar*.35){total++;if(err[i]<=err[i-1])con++;if(err[i]>err[i-1]*1.75)run++}}
+  let reversion=total?con/total:.5,runRate=total?run/total:0;
+  let pos=recent.map(x=>Math.max(x,0)),neg=recent.map(x=>Math.max(-x,0)),rev=recent.map(x=>Math.max(0,dStar-Math.abs(Math.abs(x)-dStar))),ref=recent.map((x,i)=>pos[i]-neg[i]+.35*rev[i]);
+  let PCS=(Math.abs(corr(pos,ref))+Math.abs(corr(neg,ref.map(x=>-x)))+Math.abs(corr(rev,ref)))/3;
+  let nulls=[],w=recent.length;for(let k=1;k<=32;k++){let sh=(k*5)%w,nr=recent.slice(sh).concat(recent.slice(0,sh)),np=nr.map(x=>Math.max(x,0)),nn=nr.map(x=>Math.max(-x,0)),nv=nr.map(x=>Math.max(0,dStar-Math.abs(Math.abs(x)-dStar))),nf=nr.map((x,i)=>np[i]-nn[i]+.35*nv[i]);nulls.push((Math.abs(corr(np,nf))+Math.abs(corr(nn,nf.map(x=>-x)))+Math.abs(corr(nv,nf)))/3)}
+  let pcs_z=(PCS-avg(nulls))/(sd(nulls)||1e-9);
+  let up=recent.filter(x=>x>0).length,down=recent.filter(x=>x<0).length,fmaj=Math.max(up,down)/(up+down||1),Pi=Math.max(0,1-Math.abs(2*fmaj-1));
+  let plain=recent.map(Math.abs),signed=recent.map(x=>x>=0?Math.abs(x):-Math.abs(x)),SCG=(sd(signed)**2)/(sd(plain)**2+1e-9);
+  let pass=0,block=Math.floor(recent.length/4);for(let b=0;b<4;b++){let seg=recent.slice(b*block,(b+1)*block);if(seg.length<8)continue;let a=seg.map(Math.abs),st=median(a),stable=a.filter(x=>Math.abs(x-st)<st*1.8).length/a.length;if(stable>=.55)pass++}
+  let rolling=pass/4,axiom=(reversion>=.60&&runRate<=.10)?"PASS":(reversion>=.50&&runRate<=.20)?"HOLD":"FAIL";
+  let score=0,reasons=[];if(pcs_z>=1){score+=22;reasons.push("PCS_z PASS")}else reasons.push("PCS_z FAIL");if(Pi>=.45){score+=20;reasons.push("Π PASS")}else reasons.push("Π FAIL");if(SCG>=1){score+=18;reasons.push("SCG PASS")}else reasons.push("SCG FAIL");if(rolling>=.75){score+=20;reasons.push("ROLLING PASS")}else reasons.push("ROLLING FAIL");if(axiom==="PASS"){score+=15;reasons.push("AXIOM A PASS")}else if(axiom==="HOLD"){score+=7;reasons.push("AXIOM A HOLD")}else reasons.push("AXIOM A FAIL");
+  if(open){score+=5;reasons.push("MARKET OPEN")}else{score=0;reasons.push("NASDAQ CLOSED BY NEW YORK CLOCK: GO/ARM DISABLED")}
+  let verdict="HOLD";if(open&&score>=82&&pcs_z>=1&&Pi>=.45&&SCG>=1&&rolling>=.75&&axiom==="PASS")verdict="GO";else if(open&&score>=58&&pcs_z>=.5&&Pi>=.30&&rolling>=.5&&axiom!=="FAIL")verdict="ARM";
+  return{score,confRaw:score/100,verdict,pcs_z:+pcs_z.toFixed(3),Pi:+Pi.toFixed(3),SCG:+SCG.toFixed(3),rolling:+rolling.toFixed(2),reversion:+reversion.toFixed(2),axiom,reasons};
+}
+function setState(st,open){el("state").textContent=st;el("state").className="state "+(st==="GO"?"go":st==="ARM"?"arm":"hold");el("signal").textContent=st==="GO"?"ENTER WINDOW OPEN":st==="ARM"?"ARMING":"WAIT";el("gateTitle").textContent=open?"MARKET OPEN":"MARKET CLOSED";el("gateStatus").textContent=open?"GO gate: ENABLED":"GO gate: DISABLED";el("gateText").textContent=open?"OPS gates can authorize ARM/GO if all conditions pass.":"GO/ARM are disabled while market is closed."}
+function draw(){let c=el("chart"),ctx=c.getContext("2d"),pts=S.samples;ctx.clearRect(0,0,c.width,c.height);if(pts.length<2)return;let vals=pts.map(x=>x[1]),min=Math.min(...vals),max=Math.max(...vals);el("minP").textContent=CURRENCY+" "+fmt(min);el("maxP").textContent=CURRENCY+" "+fmt(max);let t0=pts[0][0],t1=pts.at(-1)[0],dt=Math.max(1,t1-t0),px=t=>(t-t0)/dt*c.width,py=p=>c.height-((p-min)/(max-min+1e-9))*c.height;ctx.beginPath();pts.forEach((pt,i)=>{let x=px(pt[0]),y=py(pt[1]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.lineWidth=3;ctx.strokeStyle="#168a3a";ctx.stroke()}
+function memoryUpdate(){let d=MEM.decisions||[],n=d.length,go=d.filter(x=>x.verdict==="GO").length,arm=d.filter(x=>x.verdict==="ARM").length,hold=d.filter(x=>x.verdict==="HOLD").length,closed=d.filter(x=>x.market==="CLOSED").length;el("memV").textContent=n;el("memK").textContent=`GO ${go} • ARM ${arm} • HOLD ${hold}`;let status=n<100?"WARMUP":n<500?"LEARNING":"CALIBRATED";el("calV").textContent=status;el("calStatus").textContent=status;el("totalDec").textContent=n;el("calK").textContent=`closed ${closed} • local guard`;let max=n<100?100:n<500?500:n;el("calProgressText").textContent=`${Math.min(n,max)} / ${max}`;el("calProgress").style.width=Math.min(100,n/max*100)+"%";let rows=d.slice(-20).reverse().map(x=>`<tr><td>${new Date(x.t).toLocaleTimeString("el-GR")}</td><td><span class="badgeHold">${x.verdict}</span></td><td>${Math.round((x.confidence||0)*100)}</td><td>${Number(x.pcs_z||0).toFixed(2)}</td><td>${Number(x.Pi||0).toFixed(2)}</td><td>${Number(x.SCG||0).toFixed(2)}</td></tr>`).join("");el("memoryRows").innerHTML=rows||'<tr><td colspan="6">No memory yet</td></tr>'}
+async function poll(){
+  let now=Date.now();tickClock();
+  try{
+    let res=await fetchData(),meta=res.meta,q=res.indicators.quote[0];S.latestMeta=meta;S.samples=[];
+    let closes=(q.close||[]).filter(x=>typeof x==="number"&&isFinite(x)),ts=res.timestamp||[];for(let i=0;i<closes.length;i++)push((ts[i]||0)*1000||now-(closes.length-i)*60000,closes[i]);
+    let price=Number(meta.regularMarketPrice||closes.at(-1));push(now,price);let open=strictOpen(meta,now),ml=marketLabel(meta,now);
+    el("health").textContent="health: OK";el("chkWorker").textContent="OK";el("chkFeed").textContent="OK";el("marketStatus").textContent=(open?"● OPEN":"● CLOSED");el("marketStatus").className="big "+(open?"green":"red");el("marketTag").textContent=ml;el("price").textContent=CURRENCY+" "+fmt(price);el("prevClose").textContent="prev close: "+CURRENCY+" "+fmt(Number(meta.previousClose||meta.chartPreviousClose||price));el("nextOpen").textContent=open?"NOW":nextOpenText(now);
+    let ops=opsAnalyze(now);
+    const memDecision = adaptiveMemoryLookup(ops, open);
+    updateAdaptiveUI(memDecision);
+
+    if(!open){
+      ops.verdict="HOLD";ops.confRaw=0;ops.score=0;S.passStreakMs=0;
+      if(ops.reasons) ops.reasons.push("ADAPTIVE MEMORY: market lock overrides all");
+    }else{
+      ops.score=Math.max(0,Math.min(100,(ops.score||0)+(memDecision.scoreAdjust||0)));
+      ops.confRaw=Math.max(0,Math.min(1,ops.score/100));
+      if(memDecision.guard==="HOLD_BIAS" && ops.verdict==="GO"){ops.verdict="ARM"; if(ops.reasons) ops.reasons.push("ADAPTIVE MEMORY: GO softened to ARM");}
+      if(memDecision.guard==="HOLD_BIAS" && ops.verdict==="ARM" && ops.score<62){ops.verdict="HOLD"; if(ops.reasons) ops.reasons.push("ADAPTIVE MEMORY: ARM softened to HOLD");}
+      if(memDecision.guard==="GO_SUPPORT" && ops.verdict==="ARM" && ops.score>=80 && ops.pcs_z>=1 && ops.Pi>=.45 && ops.SCG>=1 && ops.axiom==="PASS"){ops.verdict="GO"; if(ops.reasons) ops.reasons.push("ADAPTIVE MEMORY: GO support confirmed");}
+      if(ops.verdict==="GO"||ops.verdict==="ARM"){S.passStreakMs+=POLL_MS}else S.passStreakMs=0;
+      if(ops.reasons) ops.reasons.push("ADAPTIVE MEMORY: "+memDecision.guard+" nearest="+memDecision.n+" memory_conf="+Math.round(memDecision.memConf*100)+"%");
+    }
+    S.confEMA=.18*ops.confRaw+.82*S.confEMA;if(!open)S.confEMA=0;S.lastState=ops.verdict;setState(S.lastState,open);el("confFill").style.width=Math.round(S.confEMA*100)+"%";el("confPct").textContent=Math.round(S.confEMA*100)+"%";el("confSub").textContent=open?"ACTIVE":"LOW (market closed)";
+    el("axiomPill").textContent="AXIOM A: "+ops.axiom;el("opsPill").textContent=`OPS: PCS_z ${ops.pcs_z.toFixed(2)} • Π ${ops.Pi.toFixed(2)} • SCG ${ops.SCG.toFixed(2)}`;el("regimePill").textContent="REGIME: "+ml;
+    el("pcsV").textContent=ops.pcs_z.toFixed(2);el("piV").textContent=ops.Pi.toFixed(2);el("scgV").textContent=ops.SCG.toFixed(2);el("streakV").textContent=Math.floor(S.passStreakMs/1000)+"s";el("pcsPass").textContent=ops.pcs_z>=1?"PASS":"HOLD";el("piPass").textContent=ops.Pi>=.45?"PASS":"HOLD";el("scgPass").textContent=ops.SCG>=1?"PASS":"HOLD";
+    draw();let rec={t:now,symbol:SYMBOL,price,verdict:S.lastState,confidence:S.confEMA,score:ops.score,pcs_z:ops.pcs_z,Pi:ops.Pi,SCG:ops.SCG,rolling:ops.rolling,axiom:ops.axiom,market:ml,reasons:ops.reasons,adaptive_memory:memDecision};MEM.samples.push({t:now,price,market:ml});MEM.decisions.push(rec);MEM.samples=MEM.samples.slice(-3000);MEM.decisions=MEM.decisions.slice(-3000);AUDIT.push(rec);AUDIT=AUDIT.slice(-500);save();memoryUpdate();
+    el("diagText").innerHTML=`<b>${VERSION}</b> • market=${ml} • GO gate=${open?"ENABLED":"DISABLED"} • samples=${S.samples.length}<br>${ops.reasons.join(" • ")}`;log(`${SYMBOL} ${ml} ${S.lastState} ${CURRENCY}${fmt(price)} conf=${Math.round(S.confEMA*100)}%`);
+  }catch(e){el("health").textContent="health: FAIL";el("chkWorker").textContent="FAIL";el("chkFeed").textContent="FAIL";el("diagText").innerHTML="<span style='color:red'>"+String(e)+"</span>";log("ERROR "+String(e))}
+}
+function tickClock(){let p=nyParts(Date.now());let t=`${String(p.hour).padStart(2,"0")}:${String(p.minute).padStart(2,"0")}:${String(p.second).padStart(2,"0")}`;el("timeNow").textContent=t;el("marketTime").textContent=t}
+function download(name,text,type){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+el("refreshBtn").onclick=poll;el("jsonBtn").onclick=()=>download("sintelia_aapl_audit.json",JSON.stringify(AUDIT,null,2),"application/json");el("memoryBtn").onclick=()=>download("sintelia_aapl_memory.json",JSON.stringify(MEM,null,2),"application/json");el("csvBtn").onclick=()=>{let h=["timeISO","symbol","price","verdict","confidence","score","pcs_z","Pi","SCG","market"];let csv=h.join(",")+"\n"+AUDIT.map(x=>[new Date(x.t).toISOString(),x.symbol,x.price,x.verdict,x.confidence,x.score,x.pcs_z,x.Pi,x.SCG,x.market].join(",")).join("\n");download("sintelia_aapl_audit.csv",csv,"text/csv")};el("clearMemoryBtn").onclick=()=>{MEM={samples:[],decisions:[]};save();memoryUpdate();log("memory cleared")};el("clearAuditBtn").onclick=()=>{AUDIT=[];save();log("audit cleared")};el("overlayBtn").onclick=()=>{overlayOn=!overlayOn;el("overlayBtn").textContent="GO Overlay: "+(overlayOn?"ON":"OFF");el("overlayBtn").classList.toggle("black",overlayOn)};el("copyLogBtn").onclick=()=>navigator.clipboard&&navigator.clipboard.writeText(el("log").textContent);
+tickClock();setInterval(tickClock,1000);memoryUpdate();log("boot • "+VERSION);poll();setInterval(poll,POLL_MS);
+</script>
+</body>
+</html>
